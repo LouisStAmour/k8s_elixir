@@ -7,9 +7,9 @@ WORKDIR /opt/app
 ENV MIX_ENV=prod REPLACE_OS_VARS=true
 
 # Cache elixir deps
-COPY src3/mix.exs mix.lock ./
-COPY src3/config ./config
-COPY src3 .
+COPY mix.exs mix.lock ./
+COPY config ./config
+COPY . .
 
 RUN mix local.hex --force && \
     mix local.rebar --force && \
