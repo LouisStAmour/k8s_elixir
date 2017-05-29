@@ -10,3 +10,5 @@ config :k8s_elix, K8sElix.Endpoint,
 
 config :logger, level: :info
 
+config :mix_docker, image: "my_app"
+
