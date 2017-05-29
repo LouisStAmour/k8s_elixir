@@ -1,0 +1,8 @@
+FROM chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
+
+EXPOSE 8000
+ENV PORT=8000 MIX_ENV=prod REPLACE_OS_VARS=true SHELL=/bin/bash
+WORKDIR /app
+COPY ./myapp.tar.gz ./
+RUN tar xfz myapp.tar.gz
+ENTRYPOINT ["bin/myapp"]
