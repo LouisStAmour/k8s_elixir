@@ -2,18 +2,17 @@ FROM chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
 
 ENV HOME=/opt/app/ TERM=xterm
 
-RUN mix local.hex --force && \
-    mix local.rebar --force
-
 WORKDIR /opt/app
 
 ENV MIX_ENV=prod REPLACE_OS_VARS=true
 
 # Cache elixir deps
-COPY src/mix.exs mix.lock ./
-RUN mix deps.get
-COPY src/config ./config
-RUN mix deps.compile
-COPY src .
-RUN mix release --env=prod
+COPY src3/mix.exs mix.lock ./
+COPY src3/config ./config
+COPY src3 .
 
+RUN mix local.hex --force && \
+    mix local.rebar --force && \
+    mix deps.get && \
+    mix deps.compile && \
+    mix release --env=prod
