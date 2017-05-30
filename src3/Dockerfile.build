@@ -11,9 +11,11 @@ COPY . ./
 
 ENV MIX_ENV=prod \
     REPLACE_OS_VARS=true \
-    PORT=4000 \
+    PORT=8000 \
     HOST=example.com \
     SECRET_KEY_BASE=highlysecretkey
+
+EXPOSE $PORT
 
 RUN mix local.hex --force && \
     mix local.rebar --force && \

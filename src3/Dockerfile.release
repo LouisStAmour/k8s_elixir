@@ -1,8 +1,18 @@
 FROM chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
 
 EXPOSE 8000
-ENV PORT=8000 MIX_ENV=prod REPLACE_OS_VARS=true SHELL=/bin/bash
-WORKDIR /app
+
+ENV MIX_ENV=prod \
+    REPLACE_OS_VARS=true \
+    PORT=8000 \
+    HOST=example.com \
+    SECRET_KEY_BASE=highlysecretkey \
+	SHELL=/bin/bash 
+
+WORKDIR /opt/app
+
 COPY ./myapp.tar.gz ./
+
 RUN tar xfz myapp.tar.gz
-ENTRYPOINT ["bin/myapp"]
+
+ENTRYPOINT ["/opt/app/_build/prod/rel/k8s_elixir/bin/k8s_elixir", "foreground"]
