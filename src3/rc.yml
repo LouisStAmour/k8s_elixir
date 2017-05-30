@@ -1,3 +1,27 @@
+######################################
+#
+# Service
+#
+######################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8000
+    name: http
+  selector:
+    app: app
+---
+######################################
+#
+# ReplicationController
+#
+######################################
 apiVersion: v1
 kind: ReplicationController
 metadata: 
@@ -6,7 +30,7 @@ metadata:
     zone: prod
     version: 1.0.0
 spec:
-  replicas: 5
+  replicas: 20
   selector: 
     app: app
   template:
