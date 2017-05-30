@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
   - name: app
-    image: chgeuer/app:1.0.0
+    image: 97c0c098ae10
     imagePullPolicy: Always
     ports: 
     - containerPort: 8080
