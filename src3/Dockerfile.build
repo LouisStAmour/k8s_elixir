@@ -1,8 +1,8 @@
 FROM chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
 
 # Cache elixir deps
-COPY ./mix.exs ./mix.lock ./
-COPY ./config ./config
+COPY mix.exs mix.lock /
+COPY config /config
 COPY . .
 
 ENV HOME=/opt/app/ TERM=xterm
