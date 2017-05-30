@@ -22,7 +22,7 @@ spec:
         - containerPort: 8000
         env:
         - name: PORT
-          value: 8000
+          value: "8000"
         - name: SECRET_KEY_BASE
           value: highlysecretkey
         - name: MIX_ENV
