@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: app
+  labels: 
+    zone: prod
+    version: 1.0.0
+spec:
+  containers:
+  - name: app
+    image: chgeuer/app:1.0.0
+    imagePullPolicy: Always
+    ports: 
+    - containerPort: 8080
+  imagePullSecrets:
+  - name: chgeuerregistry1
