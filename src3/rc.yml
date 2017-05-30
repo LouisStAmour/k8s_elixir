@@ -13,16 +13,16 @@ spec:
     metadata:
       labels: 
         app: app
-  spec:
-    containers:
-    - name: app
-      image: chgeuerregistry1.azurecr.io/chgeuer/app:1.0.0
-      imagePullPolicy: Always
-      env:
-      - SECRET_KEY_BASE: highlysecretkey
-      - MIX_ENV: prod
-      - PORT: 8000
-      ports: 
-      - containerPort: 8000
-    imagePullSecrets:
-    - name: chgeuerregistry1
+    spec:
+      containers:
+      - name: app
+        image: chgeuerregistry1.azurecr.io/chgeuer/app:1.0.0
+        imagePullPolicy: Always
+        env:
+        - SECRET_KEY_BASE: highlysecretkey
+        - MIX_ENV: prod
+        - PORT: 8000
+        ports: 
+        - containerPort: 8000
+      imagePullSecrets:
+      - name: chgeuerregistry1
