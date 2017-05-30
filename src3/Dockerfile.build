@@ -1,18 +1,20 @@
 FROM chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
 
-# Cache elixir deps
-COPY mix.exs mix.lock /
-COPY config /config
-COPY . .
-
-ENV HOME=/opt/app/ TERM=xterm
-
 WORKDIR /opt/app
 
-ENV MIX_ENV=prod REPLACE_OS_VARS=true
+RUN pwd
+
+# Cache elixir deps
+COPY mix.exs mix.lock ./
+COPY config config/
+COPY . ./
+
+ENV MIX_ENV=prod REPLACE_OS_VARS=true PORT=4000 HOST=example.com SECRET_KEY_BASE=highlysecretkey
 
 RUN mix local.hex --force && \
     mix local.rebar --force && \
     mix deps.get && \
     mix deps.compile && \
-    mix release --env=prod
+    mix release --env=$MIX_ENV
+
+ENTRYPOINT ["/opt/app/_build/prod/rel/k8s_elixir/bin/k8s_elixir", "foreground"]
