@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ReplicationController
+metadata: 
+  name: app-rc
+  labels: 
+    zone: prod
+    version: 1.0.0
+spec:
+  replicas: 5
+  selector: 
+    app: app
+  template:
+    metadata:
+      labels: 
+        app: app
+  spec:
+    containers:
+    - name: app
+      image: chgeuerregistry1.azurecr.io/chgeuer/app:1.0.0
+      imagePullPolicy: Always
+      env:
+      - SECRET_KEY_BASE: highlysecretkey
+      - MIX_ENV: prod
+      - PORT: 8000
+      ports: 
+      - containerPort: 8000
+    imagePullSecrets:
+    - name: chgeuerregistry1
