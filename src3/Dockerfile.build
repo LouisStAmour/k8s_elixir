@@ -9,7 +9,11 @@ COPY mix.exs mix.lock ./
 COPY config config/
 COPY . ./
 
-ENV MIX_ENV=prod REPLACE_OS_VARS=true PORT=4000 HOST=example.com SECRET_KEY_BASE=highlysecretkey
+ENV MIX_ENV=prod \
+    REPLACE_OS_VARS=true \
+    PORT=4000 \
+    HOST=example.com \
+    SECRET_KEY_BASE=highlysecretkey
 
 RUN mix local.hex --force && \
     mix local.rebar --force && \
