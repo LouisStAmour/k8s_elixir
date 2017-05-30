@@ -18,14 +18,14 @@ spec:
       - name: app
         image: chgeuerregistry1.azurecr.io/chgeuer/app:1.0.0
         imagePullPolicy: Always
+        ports: 
+        - containerPort: 8000
         env:
+        - name: PORT
+          value: 8000
         - name: SECRET_KEY_BASE
           value: highlysecretkey
         - name: MIX_ENV
           value: prod
-        - name: PORT
-          value: 8000
-        ports: 
-        - containerPort: 8000
       imagePullSecrets:
       - name: chgeuerregistry1
