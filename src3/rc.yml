@@ -11,9 +11,12 @@ metadata:
     app: app
 spec:
   type: LoadBalancer
+  sessionAffinity: None
   ports:
-  - port: 8000
-    name: http
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
   selector:
     app: app
 ---

@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-apline
+FROM openjdk:8-jdk
 
 ARG VERSION=3.9
 
