@@ -4,7 +4,11 @@
 
 - Install Azure CLI 2.0: `pip install --user azure-cli` (as described  [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)) or update via `pip install --upgrade azure-cli && az cloud set --name AzureGermanCloud`
 
+- Download kubctl: `curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 - Download kubctl: `curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
+
+
+
 
 ## Azure Security Setup
 
@@ -74,13 +78,13 @@ az acs kubernetes get-credentials --resource-group="${RGNAME}" --name="${K8SCLUS
 ```
 
 
-
 ```
 kubectl get ingress -o json | jq .items[0].status.loadBalancer.ingress[0].ip
 
 ssh chgeuer@chgeuerk8s.westeurope.cloudapp.azure.com -i ~/chgeuer/Java/keys/dcos.openssh.private
-```
 
+ssh "chgeuer@${K8SCLUSTERNAME}.${K8SLOCATION}.cloudapp.azure.com" -i "${SSHPRIVFILE}"
+```
 
 ```
 REPLACE_OS_VARS=true PORT=4000 HOST=localhost SECRET_KEY_BASE=highlysecretkey ./_build/prod/rel/k8s_elix/bin/k8s_elix foreground
@@ -94,10 +98,10 @@ docker login "${acr_name}.azurecr.io" \
     --username $acr_name \
     --password $acr_pass
 
-kubectl create secret docker-registry $registry \
-    --docker-server=https://${acr_name}.azurecr.io \
+kubectl create secret docker-registry "${acr_name}.azurecr.io" \
+    --docker-server="https://${acr_name}.azurecr.io" \
     --docker-username="${acr_name}" \
-    --docker-password=$acr_pass \
+    --docker-password="${acr_pass}" \
     --docker-email="root@${acr_name}"
 
 ```
@@ -254,9 +258,8 @@ REPLACE_OS_VARS=true PORT=4000 HOST=example.com SECRET_KEY_BASE=highlysecretkey 
 ### Install helm
 
 ```
-
 #install helm
-curl -O https://storage.googleapis.com/kubernetes-helm/helm-v2.4.2-linux-amd64.tar.gz
+curl -O curl -O https://dl.k8s.io/kubernetes-helm/helm-v2.4.2-linux-amd64.tar.gz
 tar xvfz helm-v2.4.2-linux-amd64.tar.gz linux-amd64/helm -C /usr/local/bin
 
 #install draft
