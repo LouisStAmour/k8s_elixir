@@ -1,0 +1,26 @@
+﻿FROM alpine:3.6
+
+ENV ELIXIR_VERSION 1.4.4
+
+RUN echo 'http://dl-4.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories && \
+    apk --update add ncurses-libs \
+                     erlang erlang-crypto erlang-syntax-tools erlang-parsetools \
+                     erlang-inets erlang-ssl erlang-public-key erlang-eunit \
+                     erlang-asn1 erlang-sasl erlang-erl-interface erlang-dev \
+                     wget \
+                     git && \
+    apk --update add --virtual build-dependencies ca-certificates && \
+    wget --no-check-certificate https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}/Precompiled.zip && \
+    mkdir -p /opt/elixir-${ELIXIR_VERSION}/ && \
+    unzip Precompiled.zip -d /opt/elixir-${ELIXIR_VERSION}/ && \
+    rm Precompiled.zip && \
+    apk del build-dependencies && \
+    rm -rf /etc/ssl && \
+    rm -rf /var/cache/apk/*
+
+ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
+
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+CMD ["/bin/sh"]
