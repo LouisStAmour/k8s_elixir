@@ -94,10 +94,6 @@ REPLACE_OS_VARS=true PORT=4000 HOST=localhost SECRET_KEY_BASE=highlysecretkey ./
 acr_name=chgeuerregistry1
 acr_pass=$(az acr credential show --name $acr_name | jq -r .passwords[0].value)
 
-docker login "${acr_name}.azurecr.io" \
-    --username $acr_name \
-    --password $acr_pass
-
 kubectl create secret docker-registry "${acr_name}.azurecr.io" \
     --docker-server="https://${acr_name}.azurecr.io" \
     --docker-username="${acr_name}" \
@@ -113,14 +109,14 @@ kubectl create secret docker-registry "${acr_name}.azurecr.io" \
 ```
 acr_name=chgeuerregistry1
 
-kubectl get secret $acr_name  --output=json | jq -r '.data[".dockercfg"]' | base64 -d | jq 
+kubectl get secret "${acr_name}.azurecr.io"  --output=json | jq -r '.data[".dockercfg"]' | base64 -d | jq 
 
-acr_pass=$(kubectl get secret $acr_name  --output=json | jq -r '.data[".dockercfg"]' | base64 -d | jq -r ".[\"https://${acr_name}.azurecr.io\"].password")
+acr_pass=$(kubectl get secret "${acr_name}.azurecr.io"  --output=json | jq -r '.data[".dockercfg"]' | base64 -d | jq -r ".[\"https://${acr_name}.azurecr.io\"].password")
 
-echo $acr_pass
+docker login "${acr_name}.azurecr.io" \
+    --username $acr_name \
+    --password $acr_pass
 ```
-
-
 
 
 ```yaml
@@ -154,7 +150,7 @@ spec:
 
 # An Elixir Dockerfile
 
-```dockerfile
+```Dockerfile
 FROM alpine:3.6
 
 ENV ELIXIR_VERSION 1.4.4
@@ -184,30 +180,21 @@ CMD ["/bin/sh"]
 ```
 
 ```
-docker build
-docker images
+acr_name=chgeuerregistry1
 
-acr_pass=$(az acr credential show --name $acr_name | jq -r ".passwords[0].value")
-docker login chgeuerregistry1.azurecr.io --username chgeuerregistry1 --password $acr_pass
+cd elixir
+docker build .   -t "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
+docker push         "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
+docker run -it --rm "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4" /bin/sh
 
-docker tag c2e10346bac3 chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
-docker push             chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
-
-docker run -it --rm chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4 /bin/sh
-
-docker run -it --rm 97c0c098ae10
-
-docker tag 97c0c098ae10 chgeuerregistry1.azurecr.io/chgeuer/app:1.0.0
-
-docker tag fa3825938bc8 chgeuerregistry1.azurecr.io/chgeuer/jenkins:1.0.1
-docker run -it --rm chgeuerregistry1.azurecr.io/chgeuer/jenkins:1.0.1 /bin/sh
-docker push             chgeuerregistry1.azurecr.io/chgeuer/jenkins:1.0.1
+cd ../src3
+cp Dockerfile.build Dockerfile
+docker build .   -t "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
+docker push         "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
+docker run -it --rm "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 
 
-
-
-
-
+kubectl create -f rc.yml
 ```
 
 # Elixir
@@ -225,7 +212,6 @@ MIX_ENV=prod mix phoenix.digest
 MIX_ENV=prod mix release --env=prod
 
 REPLACE_OS_VARS=true PORT=4000 HOST=example.com SECRET_KEY_BASE=highlysecretkey ./_build/prod/rel/k8s_elixir/bin/k8s_elixir foreground
-
 ```
 
 
