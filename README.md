@@ -77,6 +77,7 @@ az acs create --name="${K8SCLUSTERNAME}" --resource-group="${RGNAME}" --location
 az acs kubernetes get-credentials --resource-group="${RGNAME}" --name="${K8SCLUSTERNAME}" --ssh-key-file="${SSHPRIVFILE}"
 ```
 
+## ingress 
 
 ```
 kubectl get ingress -o json | jq .items[0].status.loadBalancer.ingress[0].ip
@@ -90,34 +91,49 @@ ssh "chgeuer@${K8SCLUSTERNAME}.${K8SLOCATION}.cloudapp.azure.com" -i "${SSHPRIVF
 REPLACE_OS_VARS=true PORT=4000 HOST=localhost SECRET_KEY_BASE=highlysecretkey ./_build/prod/rel/k8s_elix/bin/k8s_elix foreground
 ```
 
+## Inject Azure Container Registry credential as [`imagePullSecret`](https://kubernetes.io/docs/concepts/containers/images/#referring-to-an-imagepullsecrets-on-a-pod) into K8s
+
 ```
+K8SLOCATION="westeurope"
+RGNAME="k8s"
+K8SCLUSTERNAME="chgeuerk8s"
 acr_name=chgeuerregistry1
+
+# create a container registry
+az acr create \
+    --name="${acr_name}" \
+    --resource-group="${RGNAME}" \
+    --location="${K8SLOCATION}" \
+    --sku="Basic" \
+    --admin-enabled=true
+
+# fetch ACS password from Azure
 acr_pass=$(az acr credential show --name $acr_name | jq -r .passwords[0].value)
 
+# inject imagePullSecret to k8s
 kubectl create secret docker-registry "${acr_name}.azurecr.io" \
     --docker-server="https://${acr_name}.azurecr.io" \
     --docker-username="${acr_name}" \
     --docker-password="${acr_pass}" \
     --docker-email="root@${acr_name}"
 
-```
+# re-fetch password from k8s
+acr_pass2=$( \
+    kubectl get secret "${acr_name}.azurecr.io" --output=json | \
+    jq -r '.data[".dockercfg"]' |  \
+    base64 -d |  \
+    jq -r ".[\"https://${acr_name}.azurecr.io\"].password" \
+    )
 
-- [Referring to `imagePullSecrets` on a Pod](https://kubernetes.io/docs/concepts/containers/images/#referring-to-an-imagepullsecrets-on-a-pod)
-
-# Check imagePullSecret
-
-```
-acr_name=chgeuerregistry1
-
-kubectl get secret "${acr_name}.azurecr.io"  --output=json | jq -r '.data[".dockercfg"]' | base64 -d | jq 
-
-acr_pass=$(kubectl get secret "${acr_name}.azurecr.io"  --output=json | jq -r '.data[".dockercfg"]' | base64 -d | jq -r ".[\"https://${acr_name}.azurecr.io\"].password")
-
+# login docker to ACR
 docker login "${acr_name}.azurecr.io" \
     --username $acr_name \
     --password $acr_pass
 ```
 
+# Check imagePullSecret
+
+- [Referring to `imagePullSecrets` on a Pod](https://kubernetes.io/docs/concepts/containers/images/#referring-to-an-imagepullsecrets-on-a-pod)
 
 ```yaml
 kind: Deployment
@@ -180,8 +196,6 @@ CMD ["/bin/sh"]
 ```
 
 ```
-acr_name=chgeuerregistry1
-
 cd elixir
 docker build .   -t "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
 docker push         "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
@@ -192,7 +206,6 @@ cp Dockerfile.build Dockerfile
 docker build .   -t "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 docker push         "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 docker run -it --rm "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
-
 
 kubectl create -f rc.yml
 ```
@@ -268,5 +281,31 @@ draft init --set registry.url=$acr_name.azurecr.io,registry.org=draft,registry.a
 platformUpdateDomain=$(curl -G -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-03-01" | jq -r ".compute.platformUpdateDomain")
 
 platformFaultDomain=$(curl -G -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-03-01" | jq -r ".compute.platformFaultDomain")
+```
+
+## minikube
+
+```
+minikube start --kubernetes-version="v1.6.4" --vm-driver="hyperv" --memory=1024 --hyperv-virtual-switch="minikube" --v=7 --alsologtostderr
+
+kubectl --context="${K8SCLUSTERNAME}" get pods
+kubectl --context=azure get pods
+```
+
+### potential network fixes
+
+- https://www.shadowsplace.net/1242/windows/internet-connection-sharing-has-been-disabled-by-the-network-administrator-windows-8/
+    - `gpedit.msc` --> Computer Configuration/Administrative Templates/Network/Network Connections
+        - Disable *Prohibit installation and configuration of Network Bridge on your DNS domain network*
+        - Disable *Prohibit use of Internet Connection Firewall on your DNS domain network*
+        - Disable *Prohibit use of Internet Connection Sharing on your DNS domain network*
+        - Disable *Require domain users to elevate when setting a network’s location*
+
+```regedt32
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Network Connections]
+"NC_ShowSharedAccessUI"=dword:00000000
+"NC_PersonalFirewallConfig"=dword:00000001
 ```
 
