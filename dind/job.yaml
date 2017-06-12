@@ -1,0 +1,40 @@
+apiVersion: batch/v1 
+kind: Job 
+metadata: 
+    name: dind 
+spec: 
+    template: 
+        metadata:
+            name: dind
+        spec:
+            restartPolicy: Never
+            volumes: 
+              - name: docker-graph-storage 
+                emptyDir: {}
+              - name: gitsource
+                emptyDir: {}
+            containers: 
+              - name: dind-daemon 
+                image: docker:1.12.6-dind 
+                resources: 
+                    requests: 
+                        cpu: 20m 
+                        memory: 512Mi 
+                securityContext: 
+                    privileged: true 
+                volumeMounts: 
+                  - name: docker-graph-storage 
+                    mountPath: /var/lib/docker 
+              - name: docker-cmds 
+                image: docker:1.12.6 
+                resources: 
+                    requests: 
+                        cpu: 10m 
+                        memory: 256Mi 
+                env: 
+                  - name: DOCKER_HOST 
+                    value: tcp://localhost:2375 
+                volumeMounts: 
+                  - name: gitsource 
+                    mountPath: /gitsource
+                command: ['docker', 'run', '-p', '80:80', 'httpd:latest']

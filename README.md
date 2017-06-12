@@ -7,9 +7,6 @@
 - Download kubctl: `curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 - Download kubctl: `curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 
-
-
-
 ## Azure Security Setup
 
 - [Create an Azure service principal with Azure CLI 2.0](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli)
@@ -199,7 +196,9 @@ CMD ["/bin/sh"]
 cd elixir
 docker build .   -t "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
 docker push         "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
-docker run -it --rm "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4" /bin/sh
+docker run -it --rm "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4" /opt/elixir-1.4.4/bin/iex
+
+docker run -it --rm chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4 /opt/elixir-1.4.4/bin/iex
 
 cd ../src3
 cp Dockerfile.build Dockerfile
@@ -226,7 +225,6 @@ MIX_ENV=prod mix release --env=prod
 
 REPLACE_OS_VARS=true PORT=4000 HOST=example.com SECRET_KEY_BASE=highlysecretkey ./_build/prod/rel/k8s_elixir/bin/k8s_elixir foreground
 ```
-
 
 # Links
 
@@ -266,8 +264,7 @@ curl -O https://azuredraft.blob.core.windows.net/draft/draft-canary-linux-amd64.
 tar -xzf draft-canary-linux-amd64.tar.gz
 sudo mv linux-amd64/draft /usr/local/bin
 
-DNS A RECORD: *.draft.geuer-pollmann.de --> 52.174.247.210
-
+# DNS A RECORD: *.draft.geuer-pollmann.de --> 52.174.247.210
 
 acr_name=chgeuerregistry1
 draft_wildcard_domain=draft.geuer-pollmann.de
@@ -309,3 +306,31 @@ Windows Registry Editor Version 5.00
 "NC_PersonalFirewallConfig"=dword:00000001
 ```
 
+
+## Docker from WSL
+
+Enable "Expose daemon on tcp://localhost:2375 ithout TLS" in Docker for Windows and run this: 
+
+```bash
+echo 'export DOCKER_HOST=tcp://127.0.0.1:2375' >> ~/.bashrc 
+```
+
+Now `docker info` works
+
+
+# misc
+
+### conemu
+
+- https://github.com/Maximus5/ConEmu/releases 
+
+```
+"C:\Program Files\ConEmu\ConEmu64.exe" -basic -Single -Size 24 -Font Consolas  -run C:\Windows\System32\bash.exe ~
+```
+
+
+
+# Running build processes in Kubernetes
+
+- https://applatix.com/case-docker-docker-kubernetes-part-2/
+- 
