@@ -1,5 +1,10 @@
 #!/bin/sh
 
+cat /etc/*release
+
+curl -sSLo /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && chmod 0755 /usr/local/bin/jq
+
+
 echo "Running create-docker-image.sh"
 
 DOCKER_REGISTRY=$(echo $DOCKER_SECRET_CFG | jq -r '. | keys[0]')

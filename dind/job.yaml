@@ -10,7 +10,7 @@ spec:
                 pod.beta.kubernetes.io/init-containers: '[
                     {
                         "name": "download-git-repo",
-                        "image": "bravissimolabs/alpine-git",
+                        "image": "chgeuer/chgeuer-docker-utils",
                         "imagePullPolicy": "IfNotPresent",
                         "command": [ "git", "clone", "https://github.com/chgeuer/k8s_elixir.git", "/gitsource" ],
                         "volumeMounts": [
@@ -41,7 +41,7 @@ spec:
                   - name: docker-graph-storage 
                     mountPath: /var/lib/docker 
               - name: docker-cmds 
-                image: docker:1.12.6 
+                image: docker:1.12.6
                 resources: 
                     requests: 
                         cpu: 10m 
