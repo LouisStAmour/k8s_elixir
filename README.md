@@ -69,6 +69,27 @@ sshkey=`cat $SSHPUBFILE`
 
 az group create --name="${RGNAME}" --location="${K8SLOCATION}"
 
+PLAINTEXT_CREDS_FILE=/mnt/c/Users/chgeuer/azurecreds.json2
+cat > $PLAINTEXT_CREDS_FILE <<-EOF
+{
+  "AZURE_CLOUD": {
+    "appId": "...",
+    "password": "...",
+    "tenantId": "..."
+  },
+  "AZURE_GERMAN_CLOUD": {
+    "appId": "...",
+    "password": "...",
+    "tenantId": "..."
+  },
+  "AZURE_LINUX_PASSWORD": "..."
+}
+EOF
+AZURE_PACKER_APPID=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_CLOUD.appId)
+AZURE_PACKER_PASSWORD=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_CLOUD.password)
+AZURE_LINUX_PASSWORD=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_LINUX_PASSWORD)
+
+
 az acs create --name="${K8SCLUSTERNAME}" --resource-group="${RGNAME}" --location="${K8SLOCATION}" --orchestrator-type=kubernetes --dns-prefix="${DNSPREFIX}" --ssh-key-value="${sshkey}" --service-principal="${AZURE_PACKER_APPID}" --client-secret="${AZURE_PACKER_PASSWORD}" --master-count=1 --agent-count=2 --agent-vm-size="Standard_DS1_v2" --admin-username="chgeuer" --admin-password="${AZURE_LINUX_PASSWORD}"
 
 az acs kubernetes get-credentials --resource-group="${RGNAME}" --name="${K8SCLUSTERNAME}" --ssh-key-file="${SSHPRIVFILE}"
@@ -306,8 +327,7 @@ Windows Registry Editor Version 5.00
 "NC_PersonalFirewallConfig"=dword:00000001
 ```
 
-
-## Docker from WSL
+## Call Docker on Windows from WSL
 
 Enable "Expose daemon on tcp://localhost:2375 ithout TLS" in Docker for Windows and run this: 
 
@@ -317,20 +337,18 @@ echo 'export DOCKER_HOST=tcp://127.0.0.1:2375' >> ~/.bashrc
 
 Now `docker info` works
 
-
-# misc
-
-### conemu
-
-- https://github.com/Maximus5/ConEmu/releases 
-
-```
-"C:\Program Files\ConEmu\ConEmu64.exe" -basic -Single -Size 24 -Font Consolas  -run C:\Windows\System32\bash.exe ~
-```
-
-
-
 # Running build processes in Kubernetes
 
 - https://applatix.com/case-docker-docker-kubernetes-part-2/
-- 
+
+### Attach to pod
+
+```
+kubectl exec --container='dind-daemon' -it $(kubectl get pods --selector=job-name=dind --output=jsonpath={.items..metadata.name}) -- /bin/sh
+```
+
+### Get pod logs
+
+```
+kubectl logs --container='docker-cmds' $(kubectl get pods --show-all --selector=job-name=dind --output=jsonpath={.items..metadata.name}) 
+```
