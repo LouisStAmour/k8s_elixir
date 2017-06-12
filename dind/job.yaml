@@ -6,6 +6,21 @@ spec:
     template: 
         metadata:
             name: dind
+            annotations:
+                pod.beta.kubernetes.io/init-containers: '[
+                    {
+                        "name": "download-git-repo",
+                        "image": "bravissimolabs/alpine-git",
+                        "imagePullPolicy": "IfNotPresent",
+                        "command": [ "git", "clone", "https://github.com/chgeuer/k8s_elixir.git", "/gitsource" ],
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/gitsource",
+                                "name": "gitsource"
+                            }
+                        ]
+                    }
+                ]'
         spec:
             restartPolicy: Never
             volumes: 
@@ -34,7 +49,17 @@ spec:
                 env: 
                   - name: DOCKER_HOST 
                     value: tcp://localhost:2375 
+                  - name: DOCKER_USERNAME
+                    valueFrom:
+                      secretKeyRef:
+                        name: chgeuerregistry1.azurecr.io
+                        key: username
+                  - name: DOCKER_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: chgeuerregistry1.azurecr.io
+                        key: password
                 volumeMounts: 
                   - name: gitsource 
                     mountPath: /gitsource
-                command: ['docker', 'run', '-p', '80:80', 'httpd:latest']
+                command: [ 'docker', 'run', '-p', '80:80', 'httpd:latest']
