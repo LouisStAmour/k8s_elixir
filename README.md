@@ -89,8 +89,19 @@ AZURE_PACKER_APPID=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_CLOUD.appId)
 AZURE_PACKER_PASSWORD=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_CLOUD.password)
 AZURE_LINUX_PASSWORD=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_LINUX_PASSWORD)
 
-
-az acs create --name="${K8SCLUSTERNAME}" --resource-group="${RGNAME}" --location="${K8SLOCATION}" --orchestrator-type=kubernetes --dns-prefix="${DNSPREFIX}" --ssh-key-value="${sshkey}" --service-principal="${AZURE_PACKER_APPID}" --client-secret="${AZURE_PACKER_PASSWORD}" --master-count=1 --agent-count=2 --agent-vm-size="Standard_DS1_v2" --admin-username="chgeuer" --admin-password="${AZURE_LINUX_PASSWORD}"
+az acs create --name="${K8SCLUSTERNAME}" \
+              --resource-group="${RGNAME}" \
+              --location="${K8SLOCATION}" \
+              --orchestrator-type=kubernetes \
+              --dns-prefix="${DNSPREFIX}" \
+              --ssh-key-value="${sshkey}" \
+              --service-principal="${AZURE_PACKER_APPID}" \
+              --client-secret="${AZURE_PACKER_PASSWORD}" \
+              --master-count=1 \
+              --agent-count=2 \
+              --agent-vm-size="Standard_DS1_v2" \
+              --admin-username="chgeuer" \
+              --admin-password="${AZURE_LINUX_PASSWORD}"
 
 az acs kubernetes get-credentials --resource-group="${RGNAME}" --name="${K8SCLUSTERNAME}" --ssh-key-file="${SSHPRIVFILE}"
 ```
@@ -179,7 +190,7 @@ spec:
         - name: web
           containerPort: 4000
       imagePullSecrets:
-        - name: chgeuerregistry1
+        - name: chgeuerregistry1.azurecr.io
 ```
 
 # An Elixir Dockerfile
@@ -228,6 +239,9 @@ docker push         "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 docker run -it --rm "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 
 kubectl create -f rc.yml
+
+docker run --entrypoint /bin/sh -it --rm "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
+
 ```
 
 # Elixir
@@ -290,7 +304,6 @@ sudo mv linux-amd64/draft /usr/local/bin
 acr_name=chgeuerregistry1
 draft_wildcard_domain=draft.geuer-pollmann.de
 
-
 helm_cred=$(az acr credential show --name $acr_name | jq -M -c ". | { username: .username, password: .passwords[0].value, email: ([ \"root\", ([.username, \"azurecr.io\"] | join(\".\")) ] | join(\"@\"))}" | base64 -w 0)
 
 draft init --set registry.url=$acr_name.azurecr.io,registry.org=draft,registry.authtoken=$helm_cred,basedomain=$draft_wildcard_domain
@@ -335,7 +348,7 @@ Enable "Expose daemon on tcp://localhost:2375 ithout TLS" in Docker for Windows 
 echo 'export DOCKER_HOST=tcp://127.0.0.1:2375' >> ~/.bashrc 
 ```
 
-Now `docker info` works
+Now `docker info` works...
 
 # Running build processes in Kubernetes
 
@@ -345,6 +358,8 @@ Now `docker info` works
 
 ```
 kubectl exec --container='dind-daemon' -it $(kubectl get pods --selector=job-name=dind --output=jsonpath={.items..metadata.name}) -- /bin/sh
+
+kubectl exec --container='docker-cmds' -it $(kubectl get pods --selector=job-name=dind --output=jsonpath={.items..metadata.name}) -- /bin/sh
 ```
 
 ### Get pod logs
