@@ -49,17 +49,19 @@ spec:
                 env: 
                   - name: DOCKER_HOST 
                     value: tcp://localhost:2375 
+                  - name: DOCKER_REGISTRY
+                    value: chgeuerregistry1.azurecr.io 
                   - name: DOCKER_USERNAME
                     valueFrom:
                       secretKeyRef:
                         name: chgeuerregistry1.azurecr.io
-                        key: username
+                        key: https://chgeuerregistry1.azurecr.io
                   - name: DOCKER_PASSWORD
                     valueFrom:
                       secretKeyRef:
                         name: chgeuerregistry1.azurecr.io
-                        key: password
+                        key: 'https://chgeuerregistry1.azurecr.io'
                 volumeMounts: 
                   - name: gitsource 
                     mountPath: /gitsource
-                command: [ 'docker', 'run', '-p', '80:80', 'httpd:latest']
+                command: [ '/bin/sh', '/gitsource/dind/create-docker-image.sh']

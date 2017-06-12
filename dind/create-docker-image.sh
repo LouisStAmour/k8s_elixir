@@ -1,5 +1,11 @@
 #!/bin/sh
 
+echo "Running create-docker-image.sh"
+
+echo "DOCKER_REGISTRY ${DOCKER_REGISTRY}"
+echo "DOCKER_USERNAME ${DOCKER_USERNAME}"
+echo "DOCKER_PASSWORD ${DOCKER_PASSWORD}"
+
 cd /gitsource/src3
 cp ./Dockerfile.build ./Dockerfile
 
