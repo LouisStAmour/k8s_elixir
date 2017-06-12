@@ -49,18 +49,11 @@ spec:
                 env: 
                   - name: DOCKER_HOST 
                     value: tcp://localhost:2375 
-                  - name: DOCKER_REGISTRY
-                    value: chgeuerregistry1.azurecr.io 
-                  - name: DOCKER_USERNAME
+                  - name: DOCKER_SECRET_CFG
                     valueFrom:
                       secretKeyRef:
                         name: chgeuerregistry1.azurecr.io
-                        key: https://chgeuerregistry1.azurecr.io
-                  - name: DOCKER_PASSWORD
-                    valueFrom:
-                      secretKeyRef:
-                        name: chgeuerregistry1.azurecr.io
-                        key: 'https://chgeuerregistry1.azurecr.io'
+                        key:  .dockercfg
                 volumeMounts: 
                   - name: gitsource 
                     mountPath: /gitsource
