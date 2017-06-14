@@ -6,6 +6,9 @@
 
 echo "Running create-docker-image.sh"
 
+# /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs 2>&1 > ~/docker.log &
+/usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs &
+
 echo "Install JQ"
 apk add --no-cache jq
 
@@ -22,8 +25,6 @@ docker login "${DOCKER_REGISTRY}" \
        --password "${DOCKER_PASSWORD}"
 
 cd /gitsource
-
-/usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs 2>&1 > ~/docker.log &
 
 ##########################################
 
@@ -48,4 +49,4 @@ echo "Created all images"
 
 kill -9 $(cat /var/run/docker.pid)
 
-cat ~/docker.log
+echo "Killed docker"
