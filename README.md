@@ -1,4 +1,4 @@
-﻿# Kubernetes
+# Kubernetes
 
 - [Get started with a Kubernetes cluster in Container Service](https://docs.microsoft.com/en-us/azure/container-service/container-service-kubernetes-walkthrough)
 
@@ -238,9 +238,23 @@ docker build .   -t "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 docker push         "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 docker run -it --rm "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
 
+
+
+
+
 kubectl create -f rc.yml
 
-docker run --entrypoint /bin/sh -it --rm "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
+docker run --entrypoint /bin/sh --interactive --tty --rm "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
+docker run --entrypoint "/bin/sleep 1000"  "${acr_name}.azurecr.io/chgeuer/app:1.0.0"
+
+docker run --interactive --tty --rm --privileged --name some-overlay-docker docker:stable-dind /bin/sh
+
+/usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs &
+
+kill -9 $(cat /var/run/docker.pid)
+
+
+
 
 ```
 
@@ -307,7 +321,6 @@ draft_wildcard_domain=draft.geuer-pollmann.de
 helm_cred=$(az acr credential show --name $acr_name | jq -M -c ". | { username: .username, password: .passwords[0].value, email: ([ \"root\", ([.username, \"azurecr.io\"] | join(\".\")) ] | join(\"@\"))}" | base64 -w 0)
 
 draft init --set registry.url=$acr_name.azurecr.io,registry.org=draft,registry.authtoken=$helm_cred,basedomain=$draft_wildcard_domain
-
 
 platformUpdateDomain=$(curl -G -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-03-01" | jq -r ".compute.platformUpdateDomain")
 

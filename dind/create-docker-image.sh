@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# cat /etc/*release
+# src: https://raw.githubusercontent.com/chgeuer/k8s_elixir/master/dind/create-docker-image.sh
 
 # curl -sSLo /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && chmod 0755 /usr/local/bin/jq
 
@@ -17,10 +17,13 @@ echo "DOCKER_REGISTRY ${DOCKER_REGISTRY}"
 echo "DOCKER_USERNAME ${DOCKER_USERNAME}"
 echo "DOCKER_PASSWORD ${DOCKER_PASSWORD}"
 
-docker login "${DOCKER_REGISTRY}" --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
+docker login "${DOCKER_REGISTRY}" \
+       --username "${DOCKER_USERNAME}" \
+       --password "${DOCKER_PASSWORD}"
 
 cd /gitsource
 
+/usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs 2>&1 > ~/docker.log &
 
 ##########################################
 
@@ -31,7 +34,6 @@ docker build . -t "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4"
 docker push       "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4"
 cd ..
 
-
 ##########################################
 
 cd ./src3
@@ -40,7 +42,10 @@ docker build . -t "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"
 docker push       "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"
 cd ..
 
-
 ##########################################
 
 echo "Created all images"
+
+kill -9 $(cat /var/run/docker.pid)
+
+cat ~/docker.log
