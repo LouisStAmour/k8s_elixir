@@ -4,8 +4,8 @@
 
 - Install Azure CLI 2.0: `pip install --user azure-cli` (as described  [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)) or update via `pip install --upgrade azure-cli && az cloud set --name AzureGermanCloud`
 
-- Download kubctl: `curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
-- Download kubctl: `curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
+- Download kubctl.exe: `curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
+- Download kubctl.exe: `curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/windows/amd64/kubectl.exe` (as described [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/))
 
 ## Azure Security Setup
 
@@ -55,7 +55,7 @@ az acs create --name="%K8SCLUSTERNAME%" --resource-group="%RGNAME%" --location="
 az acs kubernetes get-credentials --resource-group="%RGNAME%" --name="%K8SCLUSTERNAME%" --ssh-key-file="%SSHPRIVFILE%"
 ```
 
-### Linux
+### Set variables on Linux and create resource group
 
 ```bash
 K8SLOCATION="westeurope"
@@ -68,8 +68,13 @@ SSHPRIVFILE="/mnt/c/Users/chgeuer/Java/keys/dcos.openssh.private"
 sshkey=`cat $SSHPUBFILE`
 
 az group create --name="${RGNAME}" --location="${K8SLOCATION}"
+```
 
+#### Store local credentials ... 
+
+```
 PLAINTEXT_CREDS_FILE=/mnt/c/Users/chgeuer/azurecreds.json2
+
 cat > $PLAINTEXT_CREDS_FILE <<-EOF
 {
   "AZURE_CLOUD": {
@@ -85,10 +90,28 @@ cat > $PLAINTEXT_CREDS_FILE <<-EOF
   "AZURE_LINUX_PASSWORD": "..."
 }
 EOF
-AZURE_PACKER_APPID=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_CLOUD.appId)
-AZURE_PACKER_PASSWORD=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_CLOUD.password)
-AZURE_LINUX_PASSWORD=$(cat $PLAINTEXT_CREDS_FILE | jq .AZURE_LINUX_PASSWORD)
+```
 
+#### Read local credentials to spin up ACS... 
+
+```
+AZURE_PACKER_APPID=$(cat    $PLAINTEXT_CREDS_FILE | jq -r .AZURE_CLOUD.appId)
+AZURE_PACKER_PASSWORD=$(cat $PLAINTEXT_CREDS_FILE | jq -r .AZURE_CLOUD.password)
+AZURE_PACKER_TENANTID=$(cat $PLAINTEXT_CREDS_FILE | jq -r .AZURE_CLOUD.tenantId)
+AZURE_LINUX_PASSWORD=$(cat  $PLAINTEXT_CREDS_FILE | jq -r .AZURE_LINUX_PASSWORD)
+
+az login \
+   --service-principal \
+   --tenant $AZURE_PACKER_TENANTID \
+   --username $AZURE_PACKER_APPID \
+   --password $AZURE_PACKER_PASSWORD
+
+az account set --subscription chgeuer-work
+```
+
+#### Spin up an ACS deployment
+
+```
 az acs create --name="${K8SCLUSTERNAME}" \
               --resource-group="${RGNAME}" \
               --location="${K8SLOCATION}" \
@@ -355,7 +378,7 @@ Windows Registry Editor Version 5.00
 
 ## Call Docker on Windows from WSL
 
-Enable "Expose daemon on tcp://localhost:2375 ithout TLS" in Docker for Windows and run this: 
+Enable "Expose daemon on tcp://localhost:2375 without TLS" in Docker for Windows and run this: 
 
 ```bash
 echo 'export DOCKER_HOST=tcp://127.0.0.1:2375' >> ~/.bashrc 
@@ -378,5 +401,8 @@ kubectl exec --container='docker-cmds' -it $(kubectl get pods --selector=job-nam
 ### Get pod logs
 
 ```
-kubectl logs --container='docker-cmds' $(kubectl get pods --show-all --selector=job-name=dind --output=jsonpath={.items..metadata.name}) 
+kubectl logs --container='docker-cmds' $(kubectl get pods --show-all --selector=job-name=dind* --output=jsonpath={.items..metadata.name}) 
+
+
+
 ```
