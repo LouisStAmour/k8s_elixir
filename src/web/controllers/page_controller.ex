@@ -4,4 +4,9 @@ defmodule K8sElixir.PageController do
   def index(conn, _params) do
     render conn, "index.html"
   end
+
+  def hostname do
+    { :ok, hn } = :inet.gethostname()
+    hn |> to_string
+  end
 end
