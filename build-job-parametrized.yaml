@@ -1,7 +1,6 @@
 apiVersion: batch/v1 
 kind: Job 
 metadata:
-  # generateName: build-job-
   name: build-job-${uuid}
 spec: 
     template: 
