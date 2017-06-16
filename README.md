@@ -407,8 +407,7 @@ kubectl logs --container='docker-cmds' $(kubectl get pods --show-all --selector=
 kubectl get pods --show-all --selector=pod-name=build-job-9td37-rlvwh
 ```
 
-
-
+```
 # http://blog.terranillius.com/post/docker_builder_pattern/
 docker build --tag "${acr_name}.azurecr.io/chgeuer/app:1.0.0" --file Dockerfile.build
 
@@ -419,4 +418,18 @@ docker exec "${container_id}" tar cvfz /k8s_elixir.tgz /opt/app/_build/prod/rel/
 docker cp "${container_id}:/k8s_elixir.tgz" ./k8s_elixir.tgz
 docker stop "${container_id}"
 docker rm "${container_id}"
+```
 
+
+
+
+```
+kubectl logs --container='dind' $(kubectl get pods --show-all --selector=job-name=dind* --output=jsonpath={.items..metadata.name}) 
+
+kubectl logs --container='dind' build-job-9sg39-4dtjx
+
+
+
+
+
+```
