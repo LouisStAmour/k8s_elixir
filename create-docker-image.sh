@@ -44,10 +44,13 @@ image_exists=$(curl --silent \
         | jq ".tags" \
         | jq "contains([\"$tag\"])")
 
+YELLOW='\033[1;33m'
+NOCOLOR='\033[0m'
+
 if [ "${image_exists}" = "true" ]; then
-	echo "Image ${image}:${tag} already exists in ${DOCKER_REGISTRY}"
+	echo -e "${YELLOW}Image ${image}:${tag} already exists in ${DOCKER_REGISTRY}${NOCOLOR}"
 else 
-    echo "Image ${image}:${tag} seems to be missing in ${DOCKER_REGISTRY}"
+    echo -e "${YELLOW}Image ${image}:${tag} seems to be missing in ${DOCKER_REGISTRY}${NOCOLORNC}"
     
     docker build \
            --tag "${DOCKER_REGISTRY}/${image}:${tag}" \
