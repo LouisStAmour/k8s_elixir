@@ -44,7 +44,7 @@ image_exists=$(curl --silent \
 	    --basic \
 	    --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" \
 	    -H "Content-Type: application/json" \
-        --url "${DOCKER_REGISTRY}.azurecr.io/v2/$image/tags/list" \
+        --url "https://${DOCKER_REGISTRY}/v2/$image/tags/list" \
         | jq ".tags" \
         | jq "contains([\"$tag\"])")
 
