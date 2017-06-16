@@ -5,9 +5,9 @@ WORKDIR /opt/app
 RUN pwd
 
 # Cache elixir deps
-COPY src/mix.exs mix.lock ./
-COPY src/config  config/
-COPY src/.       ./
+COPY mix.exs mix.lock ./
+COPY config  config/
+COPY .       ./
 
 ENV MIX_ENV=prod \
     REPLACE_OS_VARS=true \
