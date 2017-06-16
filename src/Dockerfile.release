@@ -1,6 +1,7 @@
 FROM alpine:3.6
 
-EXPOSE 8000
+RUN echo 'http://dl-4.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories && \
+    apk --update add ncurses-libs
 
 ENV MIX_ENV=prod \
     REPLACE_OS_VARS=true \
@@ -14,5 +15,7 @@ COPY ./k8s_elixir.tgz /k8s_elixir.tgz
 
 RUN tar xvfz k8s_elixir.tgz -C / && \
     rm /k8s_elixir.tgz
+
+EXPOSE $PORT
 
 ENTRYPOINT ["/opt/app/_build/prod/rel/k8s_elixir/bin/k8s_elixir", "foreground"]
