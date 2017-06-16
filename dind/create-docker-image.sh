@@ -37,7 +37,7 @@ function docker_tag_exists {
         | jq ".tags" \
         | jq "contains([\"$2\"])")
 
-    test $EXISTS = true
+    test $EXISTS = "true"
 }
 
 cd /git
