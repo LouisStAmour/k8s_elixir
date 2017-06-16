@@ -1,4 +1,4 @@
-FROM chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
+FROM alpine:3.6
 
 EXPOSE 8000
 
@@ -6,13 +6,12 @@ ENV MIX_ENV=prod \
     REPLACE_OS_VARS=true \
     PORT=8000 \
     HOST=example.com \
-    SECRET_KEY_BASE=highlysecretkey \
-	SHELL=/bin/bash 
+    SECRET_KEY_BASE=highlysecretkey
 
-WORKDIR /opt/app
+WORKDIR /
 
-COPY ./myapp.tar.gz ./
+COPY ./k8s_elixir.tgz /k8s_elixir.tgz
 
-RUN tar xfz myapp.tar.gz
+RUN tar xfz k8s_elixir.tgz
 
 ENTRYPOINT ["/opt/app/_build/prod/rel/k8s_elixir/bin/k8s_elixir", "foreground"]

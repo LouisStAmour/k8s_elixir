@@ -1,7 +1,7 @@
 apiVersion: batch/v1 
 kind: Job 
-metadata: 
-    name: dind 
+metadata:
+  generateName: build-job-
 spec: 
     template: 
         metadata:
@@ -12,11 +12,11 @@ spec:
                         "name": "download-git-repo",
                         "image": "chgeuer/chgeuer-docker-utils",
                         "imagePullPolicy": "IfNotPresent",
-                        "command": [ "git", "clone", "https://github.com/chgeuer/k8s_elixir.git", "/gitsource" ],
+                        "command": [ "git", "clone", "https://github.com/chgeuer/k8s_elixir.git", "/git" ],
                         "volumeMounts": [
                             {
-                                "mountPath": "/gitsource",
-                                "name": "gitsource"
+                                "mountPath": "/git",
+                                "name": "git"
                             }
                         ]
                     }
@@ -29,24 +29,19 @@ spec:
               - name: gitsource
                 emptyDir: {}
             containers: 
-              - name: dind-daemon 
-                # https://github.com/docker-library/docker/blob/5a196cae40e2a0ab5050cf6d79b697e032352b24/17.05/dind/Dockerfile
-                image: docker:1.12.6-dind 
+              - name: dind
+                image: docker:stable-dind
+                securityContext: 
+                    privileged: true 
                 resources: 
                     requests: 
                         cpu: 20m 
                         memory: 512Mi 
-                securityContext: 
-                    privileged: true 
                 volumeMounts: 
                   - name: docker-graph-storage 
                     mountPath: /var/lib/docker 
-              - name: docker-cmds 
-                image: docker:1.12.6
-                resources: 
-                    requests: 
-                        cpu: 10m 
-                        memory: 256Mi 
+                  - name: gitsource 
+                    mountPath: /git
                 env: 
                   - name: DOCKER_HOST 
                     value: tcp://localhost:2375 
@@ -55,7 +50,4 @@ spec:
                       secretKeyRef:
                         name: chgeuerregistry1.azurecr.io
                         key:  .dockercfg
-                volumeMounts: 
-                  - name: gitsource 
-                    mountPath: /gitsource
                 command: [ '/bin/sh', '/gitsource/dind/create-docker-image.sh']

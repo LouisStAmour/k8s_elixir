@@ -33,7 +33,7 @@ metadata:
     zone: prod
     version: 1.0.0
 spec:
-  replicas: 20
+  replicas: 4
   selector: 
     app: app
   template:

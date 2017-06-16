@@ -1,6 +1,6 @@
 export K8SLOCATION="westeurope"
-export RGNAME="k8s"
-export K8SCLUSTERNAME="chgeuerk8s"
+export RGNAME="k8s2"
+export K8SCLUSTERNAME="chgeuerk8s2"
 export DNSPREFIX="${K8SCLUSTERNAME}"
 export SSHPUBFILE="/mnt/c/Users/chgeuer/Java/keys/dcos.openssh.public"
 export SSHPRIVFILE="/mnt/c/Users/chgeuer/Java/keys/dcos.openssh.private"
@@ -16,8 +16,5 @@ export AZURE_LINUX_PASSWORD=$(cat  $PLAINTEXT_CREDS_FILE | jq -r .AZURE_LINUX_PA
 
 export acr_name=chgeuerregistry1
 
-az acs kubernetes get-credentials \
-   --resource-group="${RGNAME}" \
-   --name="${K8SCLUSTERNAME}" \
-   --ssh-key-file="${SSHPRIVFILE}"
+# az acs kubernetes get-credentials --resource-group="${RGNAME}" --name="${K8SCLUSTERNAME}" --ssh-key-file="${SSHPRIVFILE}"
 

@@ -7,7 +7,11 @@
 echo "Running create-docker-image.sh"
 
 # /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs 2>&1 > ~/docker.log &
-/usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs &
+/usr/local/bin/dockerd \
+    --host=unix:///var/run/docker.sock \
+    --host=tcp://0.0.0.0:2375 \
+    --storage-driver=vfs \
+    &
 
 echo "Install JQ"
 apk add --no-cache jq
@@ -31,16 +35,23 @@ cd /gitsource
 # $(docker pull "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4" 2>&1)
 
 cd ./elixir
-docker build . -t "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4"
-docker push       "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4"
+docker build --tag "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4" --file Dockerfile
+docker push        "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4"
 cd ..
 
 ##########################################
 
 cd ./src3
-cp ./Dockerfile.build ./Dockerfile
-docker build . -t "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"
-docker push       "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"
+docker build --tag "${DOCKER_REGISTRY}/chgeuer/appbuild:1.0.0" --file Dockerfile.build .
+
+container_id=$(docker run --detach --entrypoint "/bin/sleep" "${DOCKER_REGISTRY}/chgeuer/appbuild:1.0.0" 1d)
+docker exec "${container_id}" tar cvfz /k8s_elixir.tgz /opt/app/_build/prod/rel/k8s_elixir
+docker cp "${container_id}:/k8s_elixir.tgz" ./k8s_elixir.tgz
+docker stop "${container_id}"
+docker rm "${container_id}"
+
+docker build --tag "${DOCKER_REGISTRY}/chgeuer/app:1.0.0" --file Dockerfile.release .
+docker push        "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"
 cd ..
 
 ##########################################
