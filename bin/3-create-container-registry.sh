@@ -1,5 +1,5 @@
 
-acr_name=chgeuerregistry1
+acr_name=chgeuerregistry2
 
 az acr create \
     --name="${acr_name}" \

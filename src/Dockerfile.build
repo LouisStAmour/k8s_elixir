@@ -1,4 +1,4 @@
-FROM chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
+FROM chgeuerregistry2.azurecr.io/chgeuer/elixir:1.4.4
 
 WORKDIR /opt/app
 

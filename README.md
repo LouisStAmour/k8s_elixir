@@ -149,7 +149,7 @@ REPLACE_OS_VARS=true PORT=4000 HOST=localhost SECRET_KEY_BASE=highlysecretkey ./
 K8SLOCATION="westeurope"
 RGNAME="k8s"
 K8SCLUSTERNAME="chgeuerk8s"
-acr_name=chgeuerregistry1
+acr_name=chgeuerregistry2
 
 # create a container registry
 az acr create \
@@ -202,7 +202,7 @@ spec:
     spec:
       containers:
       - name: elixir
-        image: chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4
+        image: chgeuerregistry2.azurecr.io/chgeuer/elixir:1.4.4
         imagePullPolicy: Always
         readinessProbe:
           tcpSocket:
@@ -213,7 +213,7 @@ spec:
         - name: web
           containerPort: 4000
       imagePullSecrets:
-        - name: chgeuerregistry1.azurecr.io
+        - name: chgeuerregistry2.azurecr.io
 ```
 
 # An Elixir Dockerfile
@@ -253,7 +253,7 @@ docker build .   -t "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
 docker push         "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4"
 docker run -it --rm "${acr_name}.azurecr.io/chgeuer/elixir:1.4.4" /opt/elixir-1.4.4/bin/iex
 
-docker run -it --rm chgeuerregistry1.azurecr.io/chgeuer/elixir:1.4.4 /opt/elixir-1.4.4/bin/iex
+docker run -it --rm chgeuerregistry2.azurecr.io/chgeuer/elixir:1.4.4 /opt/elixir-1.4.4/bin/iex
 
 cd ../src3
 cp Dockerfile.build Dockerfile
@@ -338,7 +338,7 @@ sudo mv linux-amd64/draft /usr/local/bin
 
 # DNS A RECORD: *.draft.geuer-pollmann.de --> 52.174.247.210
 
-acr_name=chgeuerregistry1
+acr_name=chgeuerregistry2
 draft_wildcard_domain=draft.geuer-pollmann.de
 
 helm_cred=$(az acr credential show --name $acr_name | jq -M -c ". | { username: .username, password: .passwords[0].value, email: ([ \"root\", ([.username, \"azurecr.io\"] | join(\".\")) ] | join(\"@\"))}" | base64 -w 0)
@@ -413,7 +413,7 @@ kubectl logs --follow=true --container='build-job' build-job-pzg2f-bpmvv
 docker build --tag "${acr_name}.azurecr.io/chgeuer/app:1.0.0" --file Dockerfile.build
 
 
-export acr_name=chgeuerregistry1
+export acr_name=chgeuerregistry2
 container_id=$(docker run --detach --entrypoint "/bin/sleep" "${acr_name}.azurecr.io/chgeuer/app:1.0.0" 1d)
 docker exec "${container_id}" tar cvfz /k8s_elixir.tgz /opt/app/_build/prod/rel/k8s_elixir
 docker cp "${container_id}:/k8s_elixir.tgz" ./k8s_elixir.tgz

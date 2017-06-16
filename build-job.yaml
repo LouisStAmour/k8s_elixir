@@ -48,6 +48,6 @@ spec:
                   - name: DOCKER_SECRET_CFG
                     valueFrom:
                       secretKeyRef:
-                        name: chgeuerregistry1.azurecr.io
+                        name: chgeuerregistry2.azurecr.io
                         key:  .dockercfg
                 command: [ '/bin/sh', '/git/create-docker-image.sh']

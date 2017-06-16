@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: chgeuerregistry1.azurecr.io/chgeuer/app:1.0.0
+        image: chgeuerregistry2.azurecr.io/chgeuer/app:1.0.0
         imagePullPolicy: Always
         ports: 
         - containerPort: 8000
@@ -55,4 +55,4 @@ spec:
         - name: MIX_ENV
           value: prod
       imagePullSecrets:
-      - name: chgeuerregistry1
+      - name: chgeuerregistry2

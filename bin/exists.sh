@@ -1,7 +1,7 @@
 
 # curl --silent --basic --user "${acr_name}:${acr_pass}" -H "Content-Type: application/json" --url "https://${acr_name}.azurecr.io/v2/_catalog" | jq '.repositories'
 
-# export acr_name=chgeuerregistry1
+# export acr_name=chgeuerregistry2
 # export acr_pass=$(az acr credential show --name $acr_name | jq -r .passwords[0].value)
 
 
