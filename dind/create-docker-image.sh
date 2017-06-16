@@ -28,18 +28,6 @@ docker login "${DOCKER_REGISTRY}" \
        --username "${DOCKER_USERNAME}" \
        --password "${DOCKER_PASSWORD}"
 
-function docker_tag_exists {
-    EXISTS=$(curl --silent \
-	    --basic \
-	    --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" \
-	    -H "Content-Type: application/json" \
-        --url "${DOCKER_REGISTRY}.azurecr.io/v2/$1/tags/list" \
-        | jq ".tags" \
-        | jq "contains([\"$2\"])")
-
-    test $EXISTS = "true"
-}
-
 cd /git
 
 ##########################################
@@ -48,9 +36,19 @@ cd /git
 
 cd ./elixir
 
+
 image="chgeuer/elixir"
 tag="1.4.4"
-if docker_tag_exists "${image}" "${tag}"; then
+
+image_exists=$(curl --silent \
+	    --basic \
+	    --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" \
+	    -H "Content-Type: application/json" \
+        --url "${DOCKER_REGISTRY}.azurecr.io/v2/$image/tags/list" \
+        | jq ".tags" \
+        | jq "contains([\"$tag\"])")
+
+if [ "${image_exists}" = "true" ]; then
 	echo "Image ${image}:${tag} already exists in ${DOCKER_REGISTRY}"
 else 
     echo "Image ${image}:${tag} seems to be missing in ${DOCKER_REGISTRY}"
