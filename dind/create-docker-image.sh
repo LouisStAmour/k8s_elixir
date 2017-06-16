@@ -28,7 +28,7 @@ docker login "${DOCKER_REGISTRY}" \
        --username "${DOCKER_USERNAME}" \
        --password "${DOCKER_PASSWORD}"
 
-cd /gitsource
+cd /git
 
 ##########################################
 

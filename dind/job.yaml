@@ -26,7 +26,7 @@ spec:
             volumes: 
               - name: docker-graph-storage 
                 emptyDir: {}
-              - name: gitsource
+              - name: git
                 emptyDir: {}
             containers: 
               - name: dind
@@ -40,7 +40,7 @@ spec:
                 volumeMounts: 
                   - name: docker-graph-storage 
                     mountPath: /var/lib/docker 
-                  - name: gitsource 
+                  - name: git 
                     mountPath: /git
                 env: 
                   - name: DOCKER_HOST 
@@ -50,4 +50,4 @@ spec:
                       secretKeyRef:
                         name: chgeuerregistry1.azurecr.io
                         key:  .dockercfg
-                command: [ '/bin/sh', '/gitsource/dind/create-docker-image.sh']
+                command: [ '/bin/sh', '/git/dind/create-docker-image.sh']
