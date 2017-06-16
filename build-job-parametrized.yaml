@@ -51,4 +51,4 @@ spec:
                       secretKeyRef:
                         name: chgeuerregistry1.azurecr.io
                         key:  .dockercfg
-                command: [ '/bin/sh', '/git/dind/create-docker-image.sh']
+                command: [ '/bin/sh', '/git/create-docker-image.sh']
