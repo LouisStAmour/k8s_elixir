@@ -72,8 +72,10 @@ docker build \
 container_id=$(docker run --detach --entrypoint "/bin/sleep" "${DOCKER_REGISTRY}/chgeuer/appbuild:1.0.0" 1d)
 docker exec "${container_id}" tar cvfz /k8s_elixir.tgz /opt/app/_build/prod/rel/k8s_elixir
 docker cp   "${container_id}:/k8s_elixir.tgz" ./k8s_elixir.tgz
-docker stop "${container_id}"
-docker rm   "${container_id}"
+# docker stop "${container_id}"
+# docker rm   "${container_id}"
+
+ls -als ./k8s_elixir.tgz
 
 docker build  \
        --tag "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"  \
