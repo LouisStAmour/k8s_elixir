@@ -14,7 +14,7 @@ echo "Running create-docker-image.sh"
     &
 
 echo "Install JQ"
-apk add --no-cache jq
+apk add --no-cache jq curl
 
 DOCKER_REGISTRY=$(echo $DOCKER_SECRET_CFG | jq -r '. | keys[0]' | sed --expression="s_https://__")
 DOCKER_USERNAME=$(echo $DOCKER_SECRET_CFG | jq -r '.[. | keys[0]].username')
