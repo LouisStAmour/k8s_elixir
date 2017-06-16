@@ -401,10 +401,11 @@ kubectl exec --container='docker-cmds' -it $(kubectl get pods --selector=job-nam
 ### Get pod logs
 
 ```
-kubectl logs --container='docker-cmds' $(kubectl get pods --show-all --selector=job-name=dind* --output=jsonpath={.items..metadata.name}) 
+kubectl logs --container='dind' $(kubectl get pods --show-all --selector=name=dind --output=jsonpath={.items..metadata.name}) 
 
+kubectl get pods --show-all --selector=type=build-job-type
 
-kubectl get pods --show-all --selector=pod-name=build-job-9td37-rlvwh
+kubectl logs --follow=true --container='build-job' build-job-pzg2f-bpmvv
 ```
 
 ```
@@ -421,15 +422,6 @@ docker rm "${container_id}"
 ```
 
 
+# Jenkins
 
-
-```
-kubectl logs --container='dind' $(kubectl get pods --show-all --selector=job-name=dind* --output=jsonpath={.items..metadata.name}) 
-
-kubectl logs --container='dind' build-job-9sg39-4dtjx
-
-
-
-
-
-```
+- https://docs.microsoft.com/en-us/azure/container-service/container-service-kubernetes-jenkins

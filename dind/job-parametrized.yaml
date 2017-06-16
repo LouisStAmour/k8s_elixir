@@ -1,11 +1,12 @@
 apiVersion: batch/v1 
 kind: Job 
 metadata:
-  generateName: build-job-
+  # generateName: build-job-
+  name: build-job-${uuid}
 spec: 
     template: 
         metadata:
-            name: build-job
+            name: build-job-${uuid}
             annotations:
                 pod.beta.kubernetes.io/init-containers: '[
                     {

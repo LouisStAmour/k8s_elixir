@@ -28,16 +28,35 @@ docker login "${DOCKER_REGISTRY}" \
        --username "${DOCKER_USERNAME}" \
        --password "${DOCKER_PASSWORD}"
 
+function docker_tag_exists {
+    EXISTS=$(curl --silent \
+	    --basic \
+	    --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" \
+	    -H "Content-Type: application/json" \
+        --url "${DOCKER_REGISTRY}.azurecr.io/v2/$1/tags/list" \
+        | jq ".tags" \
+        | jq "contains([\"$2\"])")
+
+    test $EXISTS = true
+}
+
 cd /git
 
 ##########################################
 
 # $(docker pull "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4" 2>&1)
 
-cd ./elixir
-docker build --tag "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4" --file Dockerfile
-docker push        "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4"
-cd ..
+image="chgeuer/elixir"
+tag="1.4.4"
+
+if docker_tag_exists "${image}" "${tag}"; then
+	echo "Image ${image}:${tag} already exists in ${DOCKER_REGISTRY}"
+else 
+    cd ./elixir
+    docker build --tag "${DOCKER_REGISTRY}/${image}:${tag}" --file Dockerfile
+    docker push        "${DOCKER_REGISTRY}/${image}:${tag}"
+    cd ..
+fi
 
 ##########################################
 
