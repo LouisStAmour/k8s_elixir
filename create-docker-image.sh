@@ -18,7 +18,7 @@ echo "Install JQ"
 apk add --no-cache jq curl
 
 DOCKER_REGISTRY=$(echo $DOCKER_SECRET_CFG | jq -r '. | keys[0]' | sed --expression="s_https://__")
-DOCKER_USERNAME=$(echo $DOCKER_SECRET_CFG | jq -r '.[. | keys[0]].username')
+DOCKER_USERNAME=$(echo $DOCKER_SECRET_CFG | jq -r '.[. | keys[]].username')
 DOCKER_PASSWORD=$(echo $DOCKER_SECRET_CFG | jq -r '.[. | keys[0]].password')
 
 echo "DOCKER_REGISTRY ${DOCKER_REGISTRY}"
@@ -71,20 +71,18 @@ docker build \
 
 container_id=$(docker run --detach --entrypoint "/bin/sleep" "${DOCKER_REGISTRY}/chgeuer/appbuild:1.0.0" 1d)
 docker exec "${container_id}" tar cvfz /k8s_elixir.tgz /opt/app/_build/prod/rel/k8s_elixir
-docker cp   "${container_id}:/k8s_elixir.tgz" ./k8s_elixir.tgz
+docker cp   "${container_id}:/k8s_elixir.tgz" /git/src/k8s_elixir.tgz
 # docker stop "${container_id}"
 # docker rm   "${container_id}"
 
-ls -als ./k8s_elixir.tgz
+ls -als /git/src/k8s_elixir.tgz
 
 docker build  \
        --tag "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"  \
-       --file Dockerfile.release  \
+       --file /git/src/Dockerfile.release  \
        .
 
 docker push "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"
-
-cd ..
 
 ##########################################
 
