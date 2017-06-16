@@ -46,17 +46,19 @@ cd /git
 
 # $(docker pull "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4" 2>&1)
 
+cd ./elixir
+
 image="chgeuer/elixir"
 tag="1.4.4"
-
 if docker_tag_exists "${image}" "${tag}"; then
 	echo "Image ${image}:${tag} already exists in ${DOCKER_REGISTRY}"
 else 
-    cd ./elixir
-    docker build --tag "${DOCKER_REGISTRY}/${image}:${tag}" --file Dockerfile
+    echo ""Image ${image}:${tag} seems to be missing in ${DOCKER_REGISTRY}"
+    docker build --tag "${DOCKER_REGISTRY}/${image}:${tag}" --file Dockerfile .
     docker push        "${DOCKER_REGISTRY}/${image}:${tag}"
-    cd ..
 fi
+
+cd ..
 
 ##########################################
 
