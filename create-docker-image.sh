@@ -31,8 +31,6 @@ docker login "${DOCKER_REGISTRY}" \
 
 ##########################################
 
-# $(docker pull "${DOCKER_REGISTRY}/chgeuer/elixir:1.4.4" 2>&1)
-
 image="chgeuer/elixir"
 tag="1.4.4"
 
@@ -64,12 +62,14 @@ fi
 
 cd src
 
+appversion="1.0.1"
+
 docker build \
-       --tag "${DOCKER_REGISTRY}/chgeuer/appbuild:1.0.0" \
+       --tag "${DOCKER_REGISTRY}/chgeuer/appbuild:${appversion}" \
        --file Dockerfile.build \
        .
 
-container_id=$(docker run --detach --entrypoint "/bin/sleep" "${DOCKER_REGISTRY}/chgeuer/appbuild:1.0.0" 1d)
+container_id=$(docker run --detach --entrypoint "/bin/sleep" "${DOCKER_REGISTRY}/chgeuer/appbuild:${appversion}" 1d)
 docker exec "${container_id}" tar cvfz /k8s_elixir.tgz /opt/app/_build/prod/rel/k8s_elixir
 docker cp   "${container_id}:/k8s_elixir.tgz" /git/src/k8s_elixir.tgz
 # docker stop "${container_id}"
@@ -78,11 +78,11 @@ docker cp   "${container_id}:/k8s_elixir.tgz" /git/src/k8s_elixir.tgz
 ls -als /git/src/k8s_elixir.tgz
 
 docker build  \
-       --tag "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"  \
+       --tag "${DOCKER_REGISTRY}/chgeuer/app:${appversion}"  \
        --file /git/src/Dockerfile.release  \
        .
 
-docker push "${DOCKER_REGISTRY}/chgeuer/app:1.0.0"
+docker push "${DOCKER_REGISTRY}/chgeuer/app:${appversion}"
 
 ##########################################
 

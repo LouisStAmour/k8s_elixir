@@ -1,5 +1,29 @@
 ######################################
 #
+# Ingress
+#
+######################################
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-app
+  annotations:
+    nginx.com/sticky-cookie-services: "serviceName=app srv_id expires=10m path=/app"
+spec:
+  backend: 
+    serviceName: app
+    servicePort: 80
+  rules:
+  - host: cafe.example.com
+    http:
+      paths:
+      - path: /app
+        backend:
+          serviceName: app
+          servicePort: 80
+---
+######################################
+#
 # Service
 #
 ######################################
@@ -28,7 +52,7 @@ spec:
 apiVersion: v1
 kind: ReplicationController
 metadata: 
-  name: app-rc
+  name: app
   labels: 
     zone: prod
     version: 1.0.0
