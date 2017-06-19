@@ -30,7 +30,8 @@ spec:
                 emptyDir: {}
             containers: 
               - name: build-job
-                image: docker:stable-dind
+                # image: docker:stable-dind
+                image: docker:edge-dind
                 securityContext: 
                     privileged: true 
                 resources: 
