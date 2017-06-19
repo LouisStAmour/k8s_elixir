@@ -43,8 +43,6 @@ spec:
                   - name: git 
                     mountPath: /git
                 env: 
-                  - name: DOCKER_HOST 
-                    value: tcp://localhost:2375 
                   - name: DOCKER_SECRET_CFG
                     valueFrom:
                       secretKeyRef:

@@ -5,6 +5,8 @@
 
 echo "Running create-docker-image.sh"
 
+docker version
+
 cd /git
 
 # /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vfs 2>&1 > ~/docker.log &
