@@ -17,10 +17,7 @@ ENV MIX_ENV=prod \
 
 EXPOSE $PORT
 
-RUN mix local.hex --force && \
-    mix local.rebar --force && \
-    mix deps.get && \
-    mix deps.compile && \
+RUN mix deps.get && mix deps.compile && \
     mix release --env=$MIX_ENV
 
 ENTRYPOINT ["/opt/app/_build/prod/rel/k8s_elixir/bin/k8s_elixir", "foreground"]
