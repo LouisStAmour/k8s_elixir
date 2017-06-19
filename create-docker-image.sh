@@ -30,6 +30,15 @@ docker login "${DOCKER_REGISTRY}" \
        --username "${DOCKER_USERNAME}" \
        --password "${DOCKER_PASSWORD}"
 
+
+
+cd src
+
+docker build \
+           --tag "${DOCKER_REGISTRY}/multi:1.0.0" \
+           --file Dockerfile.multistage  \
+           .
+           
 ##########################################
 
 image="chgeuer/elixir"
