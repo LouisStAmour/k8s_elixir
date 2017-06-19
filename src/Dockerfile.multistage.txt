@@ -1,0 +1,53 @@
+FROM alpine:3.6 as elixir
+ENV ELIXIR_VERSION 1.4.4
+RUN echo 'http://dl-4.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories && \
+    apk --update add ncurses-libs && \
+    apk --update add erlang erlang-crypto erlang-syntax-tools erlang-parsetools \
+                     erlang-inets erlang-ssl erlang-public-key erlang-eunit \
+                     erlang-asn1 erlang-sasl erlang-erl-interface erlang-dev && \
+    apk --update add wget git bash && \
+    apk --update add --virtual build-dependencies ca-certificates && \
+    wget --no-check-certificate "https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}/Precompiled.zip" && \
+    mkdir -p /opt/elixir-${ELIXIR_VERSION}/ && \
+    unzip Precompiled.zip -d /opt/elixir-${ELIXIR_VERSION}/ && \
+    rm Precompiled.zip && \
+    apk del build-dependencies && \
+    rm -rf /etc/ssl && \
+    rm -rf /var/cache/apk/*
+ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
+RUN mix local.hex --force && \
+    mix local.rebar --force
+CMD ["/bin/sh"]
+
+##########################
+
+FROM elixir as builder
+WORKDIR /opt/app
+RUN pwd
+COPY mix.exs mix.lock ./
+COPY config  config/
+COPY .       ./
+ENV MIX_ENV=prod \
+    REPLACE_OS_VARS=true \
+    PORT=8000 \
+    HOST=example.com \
+    SECRET_KEY_BASE=highlysecretkey
+EXPOSE $PORT
+RUN mix deps.get && mix deps.compile && \
+    mix release --env=$MIX_ENV
+ENTRYPOINT ["/opt/app/_build/prod/rel/k8s_elixir/bin/k8s_elixir", "foreground"]
+
+##########################
+
+FROM alpine:3.6
+RUN echo 'http://dl-4.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories && \
+    apk --update add ncurses-libs
+ENV MIX_ENV=prod \
+    REPLACE_OS_VARS=true \
+    PORT=8000 \
+	HOST=example.com \
+    SECRET_KEY_BASE=highlysecretkey
+COPY --from=builder /opt/app /opt/app
+WORKDIR /
+EXPOSE $PORT
+ENTRYPOINT ["/opt/app/_build/prod/rel/k8s_elixir/bin/k8s_elixir", "foreground"]
